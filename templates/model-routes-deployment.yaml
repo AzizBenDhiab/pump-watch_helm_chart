@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.flask.containerName }}
+  namespace: {{ .Values.global.namespace }}
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: {{ .Values.flask.containerName }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.flask.containerName }}
+    spec:
+      containers:
+        - name: flask
+          image: {{ .Values.flask.image }}
+          ports:
+            - containerPort: {{ .Values.flask.port }}
+          envFrom:
+            - configMapRef:
+                name: {{ .Values.flask.configMapName }}
+            - secretRef:
+                name: {{ .Values.flask.secretName }}
+          volumeMounts:
+            - name: model-volume
+              mountPath: /app/models/{{ .Values.storage.model.filename }}
+              subPath: {{ .Values.storage.model.filename }}
+            - name: dataset-volume
+              mountPath: /app/models/{{ .Values.storage.dataset.filename }}
+              subPath: {{ .Values.storage.dataset.filename }}
+      volumes:
+        - name: model-volume
+          persistentVolumeClaim:
+            claimName: model-pvc
+        - name: dataset-volume
+          persistentVolumeClaim:
+            claimName: dataset-pvc

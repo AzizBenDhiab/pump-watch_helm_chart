@@ -1,0 +1,59 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.backend.configMapName }}
+  namespace: {{ .Values.global.namespace }}
+data:
+  DB_PORT: "3306"
+  DB_DATABASE: "pump_watch"
+  DB_HOST: "pump-watch-database"
+  DB_USERNAME: "root"
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.flask.configMapName }}
+  namespace: {{ .Values.global.namespace }}
+data:
+  FLASK_ENV: "production"
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.frontend.configMapName }}
+  namespace: {{ .Values.global.namespace }}
+data:
+  REACT_APP_API_BACKEND_URL: "http://pump-watch-backend:3000"
+  REACT_APP_API_FLASK_URL: "http://pump-watch-flask:5000"
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mysql-config
+  namespace: {{ .Values.global.namespace }}
+data:
+  my.cnf: |
+    [mysqld]
+    bind-address = 0.0.0.0
+    skip-name-resolve
+    datadir=/var/lib/mysql
+    socket=/var/run/mysqld/mysqld.sock
+    secure-file-priv=/var/lib/mysql-files
+    user=mysql
+    pid-file=/var/run/mysqld/mysqld.pid
+    !includedir /etc/mysql/conf.d/
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mysql-init-script
+  namespace: {{ .Values.global.namespace }}
+data:
+  init.sql: |
+    CREATE DATABASE IF NOT EXISTS pump_watch;
+    USE pump_watch;
+    -- Add any table creation or initial data scripts here

@@ -1,0 +1,50 @@
+global:
+  namespace: pump-watch
+
+flask:
+  containerName: pump-watch-model
+  image: medazizbendhiab/pump-watch-model:2.0
+  configMapName: pump-watch-model-config
+  secretName: pump-watch-model-secret
+  replicaCount: 2
+  port: 5000
+  env:
+    GOOGLE_API_KEY: "AIzaSyCYq-AavDWA5RhEoZ0lXBOfWzzOCf8u5dA"
+
+frontend:
+  image: medazizbendhiab/pump-watch-frontend:2.0
+  replicaCount: 2
+  containerName: pump-watch-frontend
+  configMapName: pump-watch-frontend-config
+  port: 3001
+  ingress:
+    enabled: true
+    host: frontend.pump-watch.local
+    path: /
+
+backend:
+  containerName: pump-watch-backend
+  image: medazizbendhiab/pump-watch-backend:2.0
+  configMapName: pump-watch-backend-config
+  secretName: pump-watch-backend-secret
+  replicaCount: 1
+  port: 3000
+
+mysql:
+  containerName: pump-watch-database
+  image: mysql:latest
+  port: 3306
+  username: root
+  password: fawzi1234
+  database: pump_watch
+  storageSize: 1Gi
+
+storage:
+  model:
+    size: 1Gi
+    path: /mnt/k8s-models
+    filename: sensor_model.h5
+  dataset:
+    size: 1Gi
+    path: /mnt/k8s-datasets
+    filename: sensor.csv
