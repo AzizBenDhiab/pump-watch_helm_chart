@@ -1,3 +1,4 @@
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -16,11 +17,14 @@ spec:
       containers:
         - name: frontend
           image: {{ .Values.frontend.image }}
+          imagePullPolicy: Always
           ports:
             - containerPort: {{ .Values.frontend.port }}
-          env:
-            - name: BROWSER
-              value: "none"
-          envFrom:
-            - configMapRef:
-                name: {{ .Values.frontend.configMapName }}
+          volumeMounts:
+            - name: nginx-config
+              mountPath: /etc/nginx/nginx.conf
+              subPath: nginx.conf
+      volumes:
+        - name: nginx-config
+          configMap:
+            name: pump-watch-frontend-nginx-config
